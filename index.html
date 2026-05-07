@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Us Check-In</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- HOME -->
+  <div id="screen-home" class="screen active">
+    <div class="card">
+      <div class="logo">💞</div>
+      <h1>Us Check-In</h1>
+      <p id="home-date" class="subtitle"></p>
+      <div id="last-checkin" class="last-checkin hidden"></div>
+      <button class="btn-primary" onclick="startCheckin()">Start Check-In</button>
+      <button class="btn-ghost" onclick="showScreen('screen-history')">View History</button>
+    </div>
+  </div>
+
+  <!-- CHECK-IN FLOW -->
+  <div id="screen-checkin" class="screen">
+    <div class="card">
+      <div class="progress-bar"><div id="progress-fill"></div></div>
+      <p class="step-label" id="step-label">Step 1 of 5</p>
+
+      <!-- Step 1: Mood -->
+      <div class="step" id="step-1">
+        <h2>How are you feeling about your relationship today?</h2>
+        <div class="emoji-grid">
+          <button class="emoji-btn" data-mood="😞" onclick="selectMood(this)">😞<span>Struggling</span></button>
+          <button class="emoji-btn" data-mood="😕" onclick="selectMood(this)">😕<span>Uncertain</span></button>
+          <button class="emoji-btn" data-mood="😐" onclick="selectMood(this)">😐<span>Neutral</span></button>
+          <button class="emoji-btn" data-mood="🙂" onclick="selectMood(this)">🙂<span>Okay</span></button>
+          <button class="emoji-btn" data-mood="😊" onclick="selectMood(this)">😊<span>Good</span></button>
+          <button class="emoji-btn" data-mood="😍" onclick="selectMood(this)">😍<span>Amazing</span></button>
+        </div>
+      </div>
+
+      <!-- Step 2: Sliders -->
+      <div class="step hidden" id="step-2">
+        <h2>Rate these areas (1–10)</h2>
+        <div class="sliders">
+          <div class="slider-row">
+            <label>Connection <span id="val-connection">5</span></label>
+            <input type="range" min="1" max="10" value="5" id="slider-connection" oninput="updateSlider('connection', this.value)">
+          </div>
+          <div class="slider-row">
+            <label>Communication <span id="val-communication">5</span></label>
+            <input type="range" min="1" max="10" value="5" id="slider-communication" oninput="updateSlider('communication', this.value)">
+          </div>
+          <div class="slider-row">
+            <label>Trust <span id="val-trust">5</span></label>
+            <input type="range" min="1" max="10" value="5" id="slider-trust" oninput="updateSlider('trust', this.value)">
+          </div>
+          <div class="slider-row">
+            <label>Happiness <span id="val-happiness">5</span></label>
+            <input type="range" min="1" max="10" value="5" id="slider-happiness" oninput="updateSlider('happiness', this.value)">
+          </div>
+          <div class="slider-row">
+            <label>Intimacy <span id="val-intimacy">5</span></label>
+            <input type="range" min="1" max="10" value="5" id="slider-intimacy" oninput="updateSlider('intimacy', this.value)">
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Yes/No -->
+      <div class="step hidden" id="step-3">
+        <h2>Quick check-in</h2>
+        <div class="yesno-list">
+          <div class="yesno-row">
+            <p>Do I feel heard by my partner?</p>
+            <div class="yesno-btns">
+              <button class="yn-btn" data-key="heard" data-val="true" onclick="selectYN(this)">Yes</button>
+              <button class="yn-btn" data-key="heard" data-val="false" onclick="selectYN(this)">No</button>
+            </div>
+          </div>
+          <div class="yesno-row">
+            <p>Did we spend quality time together recently?</p>
+            <div class="yesno-btns">
+              <button class="yn-btn" data-key="quality_time" data-val="true" onclick="selectYN(this)">Yes</button>
+              <button class="yn-btn" data-key="quality_time" data-val="false" onclick="selectYN(this)">No</button>
+            </div>
+          </div>
+          <div class="yesno-row">
+            <p>Am I being my authentic self in this relationship?</p>
+            <div class="yesno-btns">
+              <button class="yn-btn" data-key="authentic" data-val="true" onclick="selectYN(this)">Yes</button>
+              <button class="yn-btn" data-key="authentic" data-val="false" onclick="selectYN(this)">No</button>
+            </div>
+          </div>
+          <div class="yesno-row">
+            <p>Do I feel emotionally safe?</p>
+            <div class="yesno-btns">
+              <button class="yn-btn" data-key="safe" data-val="true" onclick="selectYN(this)">Yes</button>
+              <button class="yn-btn" data-key="safe" data-val="false" onclick="selectYN(this)">No</button>
+            </div>
+          </div>
+          <div class="yesno-row">
+            <p>Are we aligned on our future?</p>
+            <div class="yesno-btns">
+              <button class="yn-btn" data-key="aligned" data-val="true" onclick="selectYN(this)">Yes</button>
+              <button class="yn-btn" data-key="aligned" data-val="false" onclick="selectYN(this)">No</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: Reflection -->
+      <div class="step hidden" id="step-4">
+        <h2 id="reflection-prompt"></h2>
+        <textarea id="reflection-text" placeholder="Take your time... this is just for you." rows="5"></textarea>
+        <p class="optional-label">Optional — skip if you'd like</p>
+      </div>
+
+      <!-- Step 5: Summary -->
+      <div class="step hidden" id="step-5">
+        <h2>Your Check-In Summary</h2>
+        <div id="summary-content"></div>
+        <button class="btn-primary" onclick="saveCheckin()">Save Check-In 💾</button>
+      </div>
+
+      <div class="nav-btns">
+        <button class="btn-ghost" id="btn-back" onclick="prevStep()">← Back</button>
+        <button class="btn-primary" id="btn-next" onclick="nextStep()">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div id="screen-history" class="screen">
+    <div class="card wide">
+      <button class="btn-ghost back-btn" onclick="showScreen('screen-home')">← Home</button>
+      <h2>Your History</h2>
+
+      <div id="no-history" class="empty-state hidden">
+        <p>No check-ins yet. Start your first one! 💞</p>
+      </div>
+
+      <canvas id="trend-chart" class="hidden"></canvas>
+
+      <div id="yesno-rates" class="yesno-rates hidden"></div>
+
+      <div id="history-list"></div>
+    </div>
+  </div>
+
+  <!-- SAVED CONFIRMATION -->
+  <div id="screen-saved" class="screen">
+    <div class="card center">
+      <div class="logo">✅</div>
+      <h2>Check-In Saved!</h2>
+      <p class="subtitle">Keep showing up for yourself. That's what matters. 💞</p>
+      <button class="btn-primary" onclick="showScreen('screen-home')">Back to Home</button>
+      <button class="btn-ghost" onclick="showScreen('screen-history')">View History</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
